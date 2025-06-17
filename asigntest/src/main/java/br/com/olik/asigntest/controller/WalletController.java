@@ -1,39 +1,35 @@
 package br.com.olik.asigntest.controller;
 
-import br.com.olik.asigntest.repository.WalletRepository;
 import br.com.olik.asigntest.dto.TransactionDto;
-import br.com.olik.asigntest.entity.Wallet;
+import br.com.olik.asigntest.service.TransactionalService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @RestController
+@RequestMapping
 @RequiredArgsConstructor
 public class WalletController {
 
-    Logger logger = LoggerFactory.getLogger(WalletController.class);
-
-    private final WalletRepository walletRepository;
+    private final TransactionalService transactionalService;
 
     @GetMapping("/amount")
-    public BigDecimal getAmount(Long userId) {
-        Wallet wallet = walletRepository.findByUserId(userId);
-        return wallet.getAmount();
-    }
+    public ResponseEntity<BigDecimal> getAmount(@RequestParam Long userId) {
+        BigDecimal value = transactionalService.getAmount(userId);
+
+        return ResponseEntity.ok(value);
+   }
 
     @PostMapping("/transaction")
-    public BigDecimal transaction(@RequestBody TransactionDto transactionDto) {
-        logger.info("Start Transaction {}", transactionDto);
-        Wallet wallet = walletRepository.findByUserId(transactionDto.getUserId());
-        wallet.setAmount(wallet.getAmount().add(transactionDto.getAmount()));
-        walletRepository.save(wallet);
-        logger.info("Wallet {}", wallet);
-        return wallet.getAmount();
+    public ResponseEntity<BigDecimal> transaction(@RequestBody TransactionDto transactionDto) {
+        log.info("Start Transaction {}", transactionDto);
+        BigDecimal newAmount = transactionalService.processTransaction(transactionDto);
+
+        return ResponseEntity.ok(newAmount);
     }
+
 }
