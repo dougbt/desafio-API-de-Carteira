@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 
 @Slf4j
 @RestController
-@RequestMapping("/wallet")
+@RequestMapping
 @RequiredArgsConstructor
 public class WalletController {
 
